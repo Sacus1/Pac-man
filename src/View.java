@@ -114,7 +114,6 @@ public class View extends JPanel implements Observer {
 						g.setColor(Color.yellow);
 						g.fillRect(CASE_SIZE * i + CASE_SIZE / 4, CASE_SIZE * j + CASE_SIZE / 4, CASE_SIZE / 2, CASE_SIZE / 2);
 					}
-					default -> throw new IllegalStateException("Unexpected value: " + grid[i][j]);
 				}
 				if (ghosts != null) {
 					drawGhost(g, i, j, 0, Color.red);
