@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.Observable;
-import java.util.Observer;
 
 public class View extends JPanel implements Observer {
 	public final JFrame frame;

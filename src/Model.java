@@ -2,9 +2,8 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Observable;
 
-public class Model extends Observable {
+public class Model implements Observable {
 	private static Model instance = null;
 	public Controller controller;
 	/**
@@ -116,11 +115,6 @@ public class Model extends Observable {
 			}
 		}
 		notifyObservers();
-	}
-	@Override
-	public void notifyObservers() {
-		setChanged();
-		super.notifyObservers();
 	}
 
 	private void ChangePosition(int x, int y) {
