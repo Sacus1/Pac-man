@@ -3,19 +3,25 @@ import java.awt.*;
 
 public class View extends JPanel implements Observer {
 	public final JFrame frame;
-	private final int CASE_SIZE = 30;
+	private static final int CASE_SIZE = 30;
 	private final JLabel scoreLabel;
 	private final JPanel lifePanel;
 	private int[][] grid = new int[10][10];
+	/**
+	 * 0 : Down
+	 * 1 : Right
+	 * 2 : Up
+	 * 3 : Left
+	 */
 	private int orientation = 1;
 	private int life = 3;
 	private boolean start = false;
-	private Ghost[] ghosts;
+	private transient Ghost[] ghosts;
 
 	public View() {
 		super();
 		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setSize(800, 600);
 		frame.add(this);
 		JPanel panel = new JPanel();
@@ -52,12 +58,18 @@ public class View extends JPanel implements Observer {
 	public void update(Observable o, Object arg) {
 		if (o instanceof Model model) {
 			grid = model.grid;
-			scoreLabel.setText("Score : " + model.score);
-			orientation = model.orientation;
-			life = model.life;
+			scoreLabel.setText("Score : " + model.getScore());
+			switch (model.orientation) {
+				case DOWN -> orientation = 0;
+				case RIGHT -> orientation = 1;
+				case UP -> orientation = 2;
+				case LEFT -> orientation = 3;
+				default -> throw new IllegalStateException("Unexpected value: " + model.orientation);
+			}
+			life = model.getLife();
 			start = model.start;
 			ghosts = model.ghosts;
-			if (model.win) {
+			if (model.isWin()) {
 				JOptionPane.showMessageDialog(frame, "You win !");
 				System.exit(0);
 			}
@@ -102,18 +114,19 @@ public class View extends JPanel implements Observer {
 						g.setColor(Color.yellow);
 						g.fillRect(CASE_SIZE * i + CASE_SIZE / 4, CASE_SIZE * j + CASE_SIZE / 4, CASE_SIZE / 2, CASE_SIZE / 2);
 					}
+					default -> throw new IllegalStateException("Unexpected value: " + grid[i][j]);
 				}
 				if (ghosts != null) {
-					DrawGhost(g, i, j, 0, Color.red);
-					DrawGhost(g, i, j, 1, Color.pink);
-					DrawGhost(g, i, j, 2, Color.cyan);
+					drawGhost(g, i, j, 0, Color.red);
+					drawGhost(g, i, j, 1, Color.pink);
+					drawGhost(g, i, j, 2, Color.cyan);
 				}
 
 			}
 		}
 	}
 
-	private void DrawGhost(Graphics g, int i, int j, int i2, Color pink) {
+	private void drawGhost(Graphics g, int i, int j, int i2, Color pink) {
 		if (ghosts[i2] != null && ghosts[i2].positionX == i && ghosts[i2].positionY == j) {
 			g.setColor(ghosts[i2].isWeak ? Color.blue : pink);
 			g.fillRoundRect(CASE_SIZE * i + CASE_SIZE / 2 - CASE_SIZE / 4, CASE_SIZE * j + CASE_SIZE / 2 - CASE_SIZE / 4, CASE_SIZE / 2, CASE_SIZE / 2, CASE_SIZE / 4, CASE_SIZE / 4);

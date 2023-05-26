@@ -1,17 +1,18 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class Astar {
+public class AStar {
 	Node[][] grid;
 	private ArrayList<Node> open;
 	private ArrayList<Node> closed;
 
-	public Astar(int[][] grid) {
+	public AStar(int[][] grid) {
 		this.grid = new Node[grid.length][grid[0].length];
 		for (int i = 0; i < grid.length; i++) {
 			for (int j = 0; j < grid[0].length; j++) {
 				this.grid[i][j] = new Node(i, j);
-				this.grid[i][j].isWalkable = (grid[i][j] != 1);
+				this.grid[i][j].setWalkable((grid[i][j] != 1));
 			}
 		}
 	}
@@ -31,15 +32,15 @@ public class Astar {
 				if (open.contains(neighbor)) {
 					// if the neighbor is already in the open list, check if the path to it is shorter
 					// if yes, update the previous node, and the costs.
-					if (neighbor.gCost > neighbor.calculategCosts(current)) {
-						neighbor.setgCosts(current);
-						neighbor.previous = current;
+					if (neighbor.getGCost() > neighbor.calculateGCosts(current)) {
+						neighbor.setGCosts(current);
+						neighbor.setPrevious(current);
 					}
 				} else {
 					open.add(neighbor);
-					neighbor.previous = (current);
-					neighbor.setgCosts(current);
-					neighbor.sethCosts(destination);
+					neighbor.setPrevious((current));
+					neighbor.setGCosts(current);
+					neighbor.setHCosts(destination);
 				}
 			}
 			if (open.isEmpty()) {
@@ -54,18 +55,9 @@ public class Astar {
 		int y = current.y;
 		for (int i = x - 1; i <= x + 1; i++) {
 			for (int j = y - 1; j <= y + 1; j++) {
-				if (i == x && j == y) {
-					continue;
-				}
-				// remove diagonal neighbors
-				if (i != x && j != y) {
-					continue;
-				}
-				if (i >= 0 && i < grid.length && j >= 0 && j < grid[0].length) {
-					if (grid[i][j].isWalkable && !closed.contains(grid[i][j])) {
-						neighbors.add(grid[i][j]);
-					}
-				}
+				if ((i == x && j == y ) || (i != x && j != y)) continue;
+				if (i >= 0 && i < grid.length && j >= 0 && j < grid[0].length && (grid[i][j].isWalkable() && !closed.contains(grid[i][j])))
+					neighbors.add(grid[i][j]);
 			}
 		}
 		return neighbors;
@@ -74,7 +66,7 @@ public class Astar {
 	private Node getNodeWithLowestCost() {
 		Node best = open.get(0);
 		for (Node node : open) {
-			if (node.getfCosts() < best.getfCosts()) {
+			if (node.getFCosts() < best.getFCosts()) {
 				best = node;
 			}
 		}
@@ -96,9 +88,9 @@ public class Astar {
 		Node current = grid[dest[0]][dest[1]];
 		while (current != null) {
 			path.add(current);
-			current = current.previous;
+			current = current.getPrevious();
 		}
-		if (path.size() < 2) return null;
+		if (path.size() < 2) return new int[0];
 		Node last = path.get(path.size() - 2);
 		return new int[]{last.x, last.y};
 	}
@@ -111,18 +103,19 @@ class NoPathFoundException extends Exception {
 }
 
 class Node {
-	public int x, y;
-	public boolean isWalkable;
-	public Node previous;
-	public int gCost;
-	public int hCost;
+	public final int x;
+	public final int y;
+	private boolean isWalkable;
+	private Node previous;
+	private int gCost;
+	private int hCost;
 
 	public Node(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public int getfCosts() {
+	public int getFCosts() {
 		return gCost + hCost;
 	}
 
@@ -132,20 +125,45 @@ class Node {
 		return node.x == x && node.y == y;
 	}
 
-	int calculategCosts(Node current) {
+	@Override
+	public int hashCode() {
+		return Objects.hash(x, y);
+	}
+
+	int calculateGCosts(Node current) {
 		return (current.gCost + 10);
 	}
 
-	void setgCosts(Node current) {
-		gCost = calculategCosts(current);
+	void setGCosts(Node current) {
+		gCost = calculateGCosts(current);
 	}
 
-	void sethCosts(Node destination) {
+	void setHCosts(Node destination) {
 		hCost = Math.abs(x - destination.x) + Math.abs(this.y - destination.y) + 10;
 	}
 
 	@Override
 	public String toString() {
 		return x + " " + y;
+	}
+
+	public boolean isWalkable() {
+		return isWalkable;
+	}
+
+	public void setWalkable(boolean walkable) {
+		isWalkable = walkable;
+	}
+
+	public int getGCost() {
+		return gCost;
+	}
+
+	public Node getPrevious() {
+		return previous;
+	}
+
+	public void setPrevious(Node previous) {
+		this.previous = previous;
 	}
 }

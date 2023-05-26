@@ -1,20 +1,37 @@
 import java.util.Random;
 
 public abstract class Ghost extends Thread{
-	static int spawnX;
-	static int spawnY;
+	private static int spawnX;
+	private static int spawnY;
 	int positionX;
 	int positionY;
 	boolean isWeak = false;
 	int timeWeak = 0;
-	abstract void Move();
-	void Reset() {
+
+	static int getSpawnX() {
+		return spawnX;
+	}
+
+	static void setSpawnX(int spawnX) {
+		Ghost.spawnX = spawnX;
+	}
+
+	static int getSpawnY() {
+		return spawnY;
+	}
+
+	static void setSpawnY(int spawnY) {
+		Ghost.spawnY = spawnY;
+	}
+
+	abstract void move();
+	void reset() {
 		positionX = spawnX;
 		positionY = spawnY;
 		isWeak = false;
 	}
-	protected void MoveRandomly(Model model){
-		Random random = new Random();
+	protected Random random = new Random();
+	protected void moveRandomly(Model model){
 		int dir = random.nextInt(4);
 		switch (dir) {
 			case 0 -> {
@@ -37,8 +54,10 @@ public abstract class Ghost extends Thread{
 					positionX--;
 				}
 			}
+			default -> throw new IllegalStateException("Unexpected value: " + dir);
 		}
 	}
+	// TODO change to use the frame time instead of the sleep time
 	@Override
 	public void run() {
 		super.run();
@@ -48,7 +67,7 @@ public abstract class Ghost extends Thread{
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			Move();
+			move();
 			if (isWeak) {
 				timeWeak++;
 				if (timeWeak == 10) {
